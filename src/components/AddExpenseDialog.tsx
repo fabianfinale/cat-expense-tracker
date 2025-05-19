@@ -13,16 +13,43 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
     const [item, setItem] = useState('');
     const [category, setCategory] = useState<Category>("Food");
     const [amount, setAmount] = useState("");
+    const [errors, setErrors] = useState<{ item?: string; amount?: string }>({});
+
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        if (!item || !amount || !category) return;
+
+        const trimmedItem = item.trim();
+        const sanitizedItem = trimmedItem.replace(/[^a-zA-Z0-9\s.,'-]/g, '');
+        const parsedAmount = parseFloat(amount);
+        const newErrors: typeof errors = {};
+
+        if (!sanitizedItem) {
+            newErrors.item = 'Item name is required.';
+        } else if (sanitizedItem.length > 50) {
+            newErrors.item = 'Item name must be 50 characters or fewer.';
+        }
+
+        if (!amount) {
+            newErrors.amount = 'Amount is required.';
+        } else if (isNaN(parsedAmount) || parsedAmount <= 0) {
+            newErrors.amount = 'Amount must be greater than zero.';
+        } else if (parsedAmount > 10000) {
+            newErrors.amount = 'That’s a bit too expensive.';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setErrors({});
 
         onSubmit({
             id: crypto.randomUUID(),
-            item,
+            item: sanitizedItem,
             category,
-            amount: parseFloat(amount),
+            amount: parsedAmount,
         });
         onClose();
     }
@@ -51,6 +78,9 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
                                 required
                             />
                         </div>
+                        <div className="form-error-container">
+                            {errors.item && <p className="form-error">{errors.item}</p>}
+                        </div>
 
                         <div className="form-row">
                             <label htmlFor="category">Category:</label>
@@ -65,6 +95,8 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
                                 <option value="Accessory">Accessory</option>
                             </select>
                         </div>
+                        <div className="form-error-container">
+                        </div>
 
                         <div className="form-row">
                             <label htmlFor="amount">Amount:</label>
@@ -77,6 +109,9 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
                                 min="0.01"
                                 step="0.01"
                             />
+                        </div>
+                        <div className="form-error-container">
+                            {errors.amount && <p className="form-error">{errors.amount}</p>}
                         </div>
 
                         <div className="form-actions">

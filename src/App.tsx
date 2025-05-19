@@ -11,6 +11,15 @@ function App() {
 
     const hasSelected = expenses.some(exp => exp.selected);
 
+    const categoryTotals = expenses.reduce<Record<string, number>>((acc, exp) => {
+        acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+        return acc;
+    }, {});
+    const maxTotal = Math.max(...Object.values(categoryTotals));
+    const topCategories = Object.keys(categoryTotals).filter(
+        cat => categoryTotals[cat] === maxTotal
+    );
+
     return (
         <Fragment>
             <div>
@@ -41,7 +50,7 @@ function App() {
                         </tr>
                     ) : (
                         expenses.map((expense) => (
-                            <tr key={expense.id} className={`clickable ${expense.selected} ? 'highlight' : ''`.trim()}>
+                            <tr key={expense.id} className={`clickable ${topCategories.includes(expense.category)? 'highlight' : ''}`.trim()}>
                                 <td><input
                                     type="checkbox"
                                     checked={expense.selected || false}
