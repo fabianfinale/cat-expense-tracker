@@ -1,11 +1,15 @@
 import {Fragment, useState} from 'react'
 import type {Expense} from "./types.ts";
 import AddExpenseDialog from "./components/AddExpenseDialog.tsx";
+import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog.tsx";
 
 function App() {
     const [expenses, setExpenses] = useState<Expense[]>([]);
 
     const [showExpenseDialog, setShowExpenseDialog] = useState(false);
+    const [showDeleteConfirmationDialog, setShowDeleteConfirmationDialog] = useState(false);
+
+    const hasSelected = expenses.some(exp => exp.selected);
 
     return (
         <Fragment>
@@ -14,7 +18,9 @@ function App() {
 
                 <div className="button-group">
                     <button onClick={() => setShowExpenseDialog(true)}>Add Expense</button>
-                    <button>Delete Selected</button>
+                    <button disabled={!hasSelected} onClick={() => setShowDeleteConfirmationDialog(true)}>Delete
+                        Selected
+                    </button>
                 </div>
 
                 <table>
@@ -36,7 +42,17 @@ function App() {
                     ) : (
                         expenses.map((expense) => (
                             <tr key={expense.id} className={expense.selected ? 'highlight' : ''}>
-                                <td><input type="checkbox"/></td>
+                                <td><input
+                                    type="checkbox"
+                                    checked={expense.selected || false}
+                                    onChange={() => {
+                                        setExpenses(prev =>
+                                            prev.map(e =>
+                                                e.id === expense.id ? {...e, selected: !e.selected} : e
+                                            )
+                                        );
+                                    }}
+                                /></td>
                                 <td>{expense.item}</td>
                                 <td>{expense.category}</td>
                                 <td>{expense.amount}$</td>
@@ -51,6 +67,15 @@ function App() {
                     onClose={() => setShowExpenseDialog(false)}
                     onSubmit={(newExpense) => {
                         setExpenses(prev => [...prev, newExpense]);
+                    }}
+                />
+            )}
+            {showDeleteConfirmationDialog && (
+                <DeleteConfirmationDialog
+                    onCancel={() => setShowDeleteConfirmationDialog(false)}
+                    onConfirm={() => {
+                        setExpenses(prev => prev.filter(exp => !exp.selected));
+                        setShowDeleteConfirmationDialog(false);
                     }}
                 />
             )}
