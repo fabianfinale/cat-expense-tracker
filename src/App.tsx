@@ -26,8 +26,8 @@ function App() {
                 <h1>Cat Expense Tracker</h1>
 
                 <div className="button-group">
-                    <button onClick={() => setShowExpenseDialog(true)}>Add Expense</button>
-                    <button disabled={!hasSelected} onClick={() => setShowDeleteConfirmationDialog(true)}>Delete
+                    <button onClick={() => setShowExpenseDialog(true)} aria-label="Add a new expense">Add Expense</button>
+                    <button disabled={!hasSelected} onClick={() => setShowDeleteConfirmationDialog(true)} aria-label="Delete selected expenses">Delete
                         Selected
                     </button>
                 </div>
@@ -36,9 +36,9 @@ function App() {
                     <thead>
                     <tr>
                         <th></th>
-                        <th>Item</th>
-                        <th>Category</th>
-                        <th>Amount</th>
+                        <th scope="col">Item</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Amount</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -61,6 +61,7 @@ function App() {
                                             )
                                         );
                                     }}
+                                    aria-label={`Select ${expense.item}`}
                                 /></td>
                                 <td>{expense.item}</td>
                                 <td>{expense.category}</td>

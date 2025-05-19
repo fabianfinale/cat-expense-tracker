@@ -1,4 +1,4 @@
-import {type FC, type FormEvent, useState} from 'react';
+import {type FC, type FormEvent, useEffect, useRef, useState} from 'react';
 import type {Category, Expense} from "../types.ts";
 import CatFact from "./CatFact.tsx";
 
@@ -14,6 +14,23 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
     const [category, setCategory] = useState<Category>("Food");
     const [amount, setAmount] = useState("");
     const [errors, setErrors] = useState<{ item?: string; amount?: string }>({});
+
+    const itemRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        itemRef.current?.focus();
+    }, []);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
 
 
     const handleSubmit = (e: FormEvent) => {
@@ -55,9 +72,11 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
     }
 
     return (
-        <div className="dialog-overlay">
+        <div className="dialog-overlay" role="dialog"
+             aria-modal="true"
+             aria-labelledby="modal-title">
             <div className="dialog">
-                <h2>Add Expense</h2>
+                <h2 id={"modal-title"}>Add Expense</h2>
                 <button
                     className="dialog-close"
                     onClick={onClose}
@@ -76,6 +95,7 @@ const AddExpenseDialog: FC<AddExpenseDialogProps> = ({onClose, onSubmit}) => {
                                 value={item}
                                 onChange={(e) => setItem(e.target.value)}
                                 required
+                                ref={itemRef}
                             />
                         </div>
                         <div className="form-error-container">
