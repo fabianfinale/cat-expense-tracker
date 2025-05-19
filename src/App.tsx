@@ -41,7 +41,7 @@ function App() {
                         </tr>
                     ) : (
                         expenses.map((expense) => (
-                            <tr key={expense.id} className={expense.selected ? 'highlight' : ''}>
+                            <tr key={expense.id} className={`clickable ${expense.selected} ? 'highlight' : ''`.trim()}>
                                 <td><input
                                     type="checkbox"
                                     checked={expense.selected || false}
